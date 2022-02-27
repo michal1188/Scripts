@@ -1,0 +1,3 @@
+#!/bin/bash
+BACKUP_DATE=$(date +"%Y_%m_%d")
+/home/server/bin/backup_databases "$BACKUP_DATE" > "/home/server/Kopie baz danych/backup_$BACKUP_DATE.log"

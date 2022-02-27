@@ -1,0 +1,171 @@
+#!/bin/bash
+if [ "$1" == "" ]
+then
+	echo "Date argument was not given. The format is YYYY_MM_DD"
+	exit 1
+fi
+
+BACKUP_PATH="$HOME/Kopie baz danych/$1"
+
+echo "Creating directory \"$BACKUP_PATH\""
+mkdir -p "$BACKUP_PATH"
+
+# Backup database: general
+GENERAL_BACKUP_PATH="$BACKUP_PATH/general"
+
+echo "Creating directory \"$GENERAL_BACKUP_PATH\""
+mkdir "$GENERAL_BACKUP_PATH"
+
+LOG_DIRECTORY="$GENERAL_BACKUP_PATH/logs"
+echo "Creating log directory \"$LOG_DIRECTORY\""
+mkdir "$LOG_DIRECTORY"
+
+echo "Creating backup of general database schema"
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/schemat_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --schema-only --no-owner --no-privileges "postgres" &> "$LOG_DIRECTORY/schemat.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Schema backup exited with error. See \"$LOG_DIRECTORY/schemat.log\" for details"
+fi
+
+echo "Creating backup of schema \"analytic\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/analytic_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "analytic" "postgres" &> "$LOG_DIRECTORY/analytic.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of analytic exited with error. See \"$LOG_DIRECTORY/analytic.log\" for details"
+fi
+
+echo "Creating backup of schema \"common\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/common_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "common" "postgres" &> "$LOG_DIRECTORY/common.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of common exited with error. See \"$LOG_DIRECTORY/common.log\" for details"
+fi
+
+echo "Creating backup of schema \"getener\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/getener_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "getener" "postgres" &> "$LOG_DIRECTORY/getener.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of getener exited with error. See \"$LOG_DIRECTORY/getener.log\" for details"
+fi
+
+echo "Creating backup of schema \"iot\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/iot_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "iot" "postgres" &> "$LOG_DIRECTORY/iot.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of iot exited with error. See \"$LOG_DIRECTORY/iot.log\" for details"
+fi
+
+echo "Creating backup of schema \"meta\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/meta_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "meta" "postgres" &> "$LOG_DIRECTORY/meta.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of meta exited with error. See \"$LOG_DIRECTORY/meta.log\" for details"
+fi
+
+echo "Creating backup of schema \"panel\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/panel_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "panel" "postgres" &> "$LOG_DIRECTORY/panel.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of panel exited with error. See \"$LOG_DIRECTORY/panel.log\" for details"
+fi
+
+echo "Creating backup of schema \"public\""
+/usr/bin/pg_dump --file "$GENERAL_BACKUP_PATH/public_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "public" "postgres" &> "$LOG_DIRECTORY/public.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of public exited with error. See \"$LOG_DIRECTORY/public.log\" for details"
+fi
+
+# Backup database: replication
+REPLICATION_BACKUP_PATH="$BACKUP_PATH/replication"
+
+echo "Creating directory \"$REPLICATION_BACKUP_PATH\""
+mkdir -p "$REPLICATION_BACKUP_PATH"
+
+LOG_DIRECTORY="$REPLICATION_BACKUP_PATH/logs"
+echo "Creating log directory \"$LOG_DIRECTORY\""
+mkdir "$LOG_DIRECTORY"
+
+echo "Creating backup of replication database schema"
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/schemat_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --schema-only --no-owner --no-privileges "postgres" &> "$LOG_DIRECTORY/schemat.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Schema backup exited with error. See \"$LOG_DIRECTORY/schemat.log\" for details"
+fi
+
+echo "Creating backup of schema \"analytic\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/analytic_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "analytic" "postgres" &> "$LOG_DIRECTORY/analytic.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of analytic exited with error. See \"$LOG_DIRECTORY/analytic.log\" for details"
+fi
+
+echo "Creating backup of schema \"backup\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/backup_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "backup" "postgres" &> "$LOG_DIRECTORY/backup.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of backup exited with error. See \"$LOG_DIRECTORY/backup.log\" for details"
+fi
+
+echo "Creating backup of schema \"common\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/common_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "common" "postgres" &> "$LOG_DIRECTORY/common.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of common exited with error. See \"$LOG_DIRECTORY/common.log\" for details"
+fi
+
+echo "Creating backup of schema \"getener\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/getener_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "getener" "postgres" &> "$LOG_DIRECTORY/getener.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of getener exited with error. See \"$LOG_DIRECTORY/getener.log\" for details"
+fi
+
+echo "Creating backup of schema \"iot\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/iot_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "iot" "postgres" &> "$LOG_DIRECTORY/iot.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of iot exited with error. See \"$LOG_DIRECTORY/iot.log\" for details"
+fi
+
+echo "Creating backup of schema \"meta\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/meta_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "meta" "postgres" &> "$LOG_DIRECTORY/meta.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of meta exited with error. See \"$LOG_DIRECTORY/meta.log\" for details"
+fi
+
+echo "Creating backup of schema \"panel\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/panel_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "panel" "postgres" &> "$LOG_DIRECTORY/panel.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of panel exited with error. See \"$LOG_DIRECTORY/panel.log\" for details"
+fi
+
+echo "Creating backup of schema \"pgbouncer\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/pgbouncer_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "pgbouncer" "postgres" &> "$LOG_DIRECTORY/pgbouncer.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of pgbouncer exited with error. See \"$LOG_DIRECTORY/pgbouncer.log\" for details"
+fi
+
+echo "Creating backup of schema \"public\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/public_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "public" "postgres" &> "$LOG_DIRECTORY/public.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of public exited with error. See \"$LOG_DIRECTORY/public.log\" for details"
+fi
+
+echo "Creating backup of schema \"tangent\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/tangent_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "tangent" "postgres" &> "$LOG_DIRECTORY/tangent.log"
+if [ "$?" != 0 ]
+then 
+	echo "Warning: Backup of tangent exited with error. See \"$LOG_DIRECTORY/tangent.log\" for details"
+fi
+
+echo "Creating backup of schema \"analytics_tools\""
+/usr/bin/pg_dump --file "$REPLICATION_BACKUP_PATH/analytics_tools_$1" --host "postgres.database.azure.com" --port "5432" --username "xxx" --no-password --verbose --format=c --blobs --data-only --no-owner --no-privileges --schema "analytics_tools" "postgres" &> "$LOG_DIRECTORY/analytics_tools.log"
+if [ "$?" != 0 ]
+then 
+        echo "Warning: Backup of analytics_tools  exited with error. See \"$LOG_DIRECTORY/analytics_tools.log\" for details"
+fi

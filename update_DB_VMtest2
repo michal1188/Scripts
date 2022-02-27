@@ -1,0 +1,200 @@
+#!/bin/bash
+#Dane dostępowe do bazy danych 
+export PGHOST=0.0.0.0
+export PGPASSWORD='x'
+export PGUSER=postgres
+export PGPORT=5557
+
+echo " Aktualizacja bazy danych: host- $PGHOST port- $PGPORT nazwa bazy- test2 " 
+#Data do odczytania najnowszych plików kopi repliki
+data=$(date -d "-2 days" +'%Y_%m_%d')
+#Sprawdzenie  Poprawności odczytania  daty aktualizacji
+echo "Data aktualizacji $1" 
+if [ "$1" == "" ]
+then
+        echo "Date argument was not given. The format is YYYY_MM_DD"
+        exit 1
+fi
+
+#Połączenie z serwerem 10.0.0.65 oraz  podpięcie  plików z kopią danych 
+fusermount -u /home/vsrv02/Update_DB/Kopie
+echo 'P@ssw0rd' | sshfs server@10.0.0.65:"/home/server/Kopie baz danych/$data/replication/" /home/vsrv02/Update_DB/Kopie -o password_stdin
+
+echo "Połączenie z serwerem 10.0.0.65 oraz  podpięcie  plików z kopią danych"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo " sshfs server@10.0.0.65: Success" 
+else
+        echo "sshfs server@10.0.0.65:  Error"
+        exit 1
+fi
+
+
+
+echo "Usunięcie uprawnień dostępu połączenia z bazą danych dla każdej z ról"  
+psql -c "REVOKE CONNECT ON DATABASE test2 FROM public;" 
+RESULT=$?
+
+if [ $RESULT -eq 0 ] ;then
+        echo " REVOKE Success" 
+else
+        echo "REVOKE Error"
+        exit 1
+fi
+
+echo "Rozłączenie istniejących połączeń z bazą oprócz obecnego" 
+psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'test2';" 
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo " pg_stat_activity Success" 
+else
+        echo "pg_stat_activity  Error"
+        exit 1
+fi
+
+echo "Usunięcie bazy danych" 
+psql -c " DROP DATABASE  test2;" 
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo " DROP  DATABASE Success" 
+else
+        echo "DROP DATABASE  Error"
+        exit 1
+fi
+
+echo "Utworzenie nowej  bazy danych" 
+psql -c "CREATE DATABASE test2 WITH OWNER = postgres ENCODING = 'UTF8' CONNECTION LIMIT = -1;" 
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "CREATE DATABASE  Success" 
+else
+        echo "CREATE DATABASE Error"
+        exit 1
+fi
+
+echo "Aktualizacja schematu bazy danych"  
+pg_restore  -d "test2" --verbose --schema-only  --no-owner --no-privileges --disable-triggers  "/home/vsrv02/Update_DB/Kopie/schemat_$data"
+#RESULT=$?
+#if [ $RESULT -eq 0 ] ;then
+#        echo "UPDATE schema  Success" 
+#else
+#        echo "UPDATE schema  Error"
+#        exit 1
+#fi
+
+echo "Aktualizacja danych tangent"
+pg_restore  -d "test2" --schema="tangent" --verbose --data-only  --no-owner --no-privileges --disable-triggers< "/home/vsrv02/Update_DB/Kopie/tangent_$data"
+
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data tangent  Success" 
+else
+        echo "UPDATE data tangent Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych analytic"
+pg_restore  -d "test2" --schema="analytic" --verbose --data-only  --no-owner --no-privileges --disable-triggers< "/home/vsrv02/Update_DB/Kopie/analytic_$data" 
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data analytic  Success" 
+else
+        echo "UPDATE data  analytic Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych backup"
+
+pg_restore  -d "test2" --schema="backup" --verbose --data-only  --no-owner --no-privileges < "/home/vsrv02/Update_DB/Kopie/backup_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data backup  Success" 
+else
+        echo "UPDATE data backup Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych common" 
+pg_restore  -d "test2" --schema="common" --verbose --data-only  --no-owner --no-privileges --disable-triggers< "/home/vsrv02/Update_DB/Kopie/common_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data common  Success" 
+else
+        echo "UPDATE data common  Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych getener"
+pg_restore  -d "test2" --schema="getener" --verbose --data-only  --no-owner --no-privileges --disable-triggers < "/home/vsrv02/Update_DB/Kopie/getener_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data getener   Success" 
+else
+        echo "UPDATE data getener  Error"
+        exit 1
+fi
+echo "Aktualizacja danych iot"
+pg_restore  -d "test2" --schema="iot" --verbose --data-only  --no-owner --no-privileges --disable-triggers< "/home/vsrv02/Update_DB/Kopie/iot_$data"
+
+#RESULT=$?
+#if [ $RESULT -eq 0 ] ;then
+#        echo "UPDATE data iot  Success" 
+#else
+#        echo "UPDATE data iot  Error"
+#        exit 1
+#fi
+
+echo "Aktualizacja danych meta"
+pg_restore  -d "test2" --schema="meta" --verbose --data-only  --no-owner --no-privileges --disable-triggers < "/home/vsrv02/Update_DB/Kopie/meta_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data meta  Success" 
+else
+        echo "UPDATE data meta  Error"
+        exit 1
+fi
+
+
+echo "Aktualizacja danych panel"
+pg_restore  -d "test2" --schema="panel" --verbose --data-only  --no-owner --no-privileges --disable-triggers < "/home/vsrv02/Update_DB/Kopie/panel_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data panel  Success" 
+else
+        echo "UPDATE data panel Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych pgbouncer"
+pg_restore  -d "test2" --schema="pgbouncer" --verbose --data-only  --no-owner --no-privileges --disable-triggers< "/home/vsrv02/Update_DB/Kopie/pgbouncer_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data pgbouncer  Success" 
+else
+        echo "UPDATE data pgbouncer  Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych public" 
+pg_restore  -d "test2" --schema="public" --verbose --data-only  --no-owner --no-privileges  --disable-triggers < "/home/vsrv02/Update_DB/Kopie/public_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data public Success" 
+else
+        echo "UPDATE data public Error"
+        exit 1
+fi
+
+echo "Aktualizacja danych analytics_tools" 
+pg_restore  -d "test" --schema="analytics_tools" --verbose --data-only  --no-owner --no-privileges  --disable-triggers < "/home/vsrv02/Update_DB/Kopie/analytics_tools_$data"
+RESULT=$?
+if [ $RESULT -eq 0 ] ;then
+        echo "UPDATE data analytics_tools Success"
+else
+        echo "UPDATE data analytics_tools Error"
+        exit 1
+fi
+
+
+ echo "Aktualizacja Bazy dla VMtest2 zakończona"
+

@@ -1,0 +1,3 @@
+#!/bin/bash
+UPDATE_DATE=$(date +"%Y_%m_%d")
+/home/vsrv02/Update_DB/update_DB_VMtest2 "$UPDATE_DATE" &> "/home/vsrv02/Update_DB/Log/update_$UPDATE_DATE.log"
