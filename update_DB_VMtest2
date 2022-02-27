@@ -18,7 +18,7 @@ fi
 
 #Połączenie z serwerem 10.0.0.65 oraz  podpięcie  plików z kopią danych 
 fusermount -u /home/vsrv02/Update_DB/Kopie
-echo 'P@ssw0rd' | sshfs server@10.0.0.65:"/home/server/Kopie baz danych/$data/replication/" /home/vsrv02/Update_DB/Kopie -o password_stdin
+echo 'Password' | sshfs server@10.0.0.65:"/home/server/Kopie baz danych/$data/replication/" /home/vsrv02/Update_DB/Kopie -o password_stdin
 
 echo "Połączenie z serwerem 10.0.0.65 oraz  podpięcie  plików z kopią danych"
 RESULT=$?
